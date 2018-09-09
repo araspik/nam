@@ -1,0 +1,6 @@
+name "nam"
+description "Not Another Make."
+authors "araspik"
+copyright "Copyright © 2018, araspik"
+license "MIT"
+dependency "sdlang-d" version="~>0.10.4"

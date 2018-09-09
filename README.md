@@ -3,6 +3,11 @@
 A build system which uses [SDL][sdl] as a description language.
 It is written in the [D Programming Language][dlang].
 
+### Why SDL?
+The idea of having a non-Turing-complete description is from trying out [Meson][meson],
+where a customised DSL is used so that processing becomes very fast. Variable defining is
+still legal, so functionality is not completely lost.
+
 ### License
 MIT License
 
@@ -28,3 +33,4 @@ SOFTWARE.
 
 [sdl]: https://sdlang.org
 [dlang]: https://dlang.org
+[meson]: https://mesonbuild.com
