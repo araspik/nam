@@ -1,0 +1,17 @@
+project "Example" {
+  languages "c" "c++"
+  version 0 0 1
+}
+
+cmd "example" {
+  sources "example.c"
+  outputs "example.o"
+  depends "example_lib"
+  command "gcc" "-c" "example_lib.so" "example.c" "-o example.o"
+}
+
+cmd "example_lib" {
+  sources "example_lib.c"
+  outputs "example_lib.so"
+  command "gcc -fPIC -c example_lib.c -shared -o example_lib.so"
+}
