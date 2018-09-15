@@ -1,30 +1,22 @@
 module app;
 
-import sdlang;
-
-import std.algorithm: map;
+import std.algorithm: map, each;
 import std.stdio;
 
-import project;
-import command;
+import nam.project;
+import nam.command;
 
 void main(string[] args) {
 
-  Tag root = "stuff.sdl".parseFile;
+  Project proj = Project("stuff.sdl");
 
-  Project proj = Project(root.expectTag("project"));
-
-  writeln("Project: ", proj.name);
-  writeln("Languages: ", proj.langs);
-  writeln("Version: ", proj.ver);
-
-  foreach (c; root.tags["cmd"].map!(t => Command(t))) {
-    writeln("* Command \"", c.name, "\"");
-    writeln("  Sources: ", c.sources);
-    writeln("  Outputs: ", c.outputs);
-    writeln("  Commands: ", c.commands);
-    writeln("  Dependencies: ", c.depends);
-
-    writeln("  Needs updating: ", c.sourceUpdateTime > c.outputUpdateTime);
+  switch (args.length) {
+    case 1:
+      proj.write;
+      break;
+    case 2:
+      proj.cmds[args[1]].write;
+      break;
+    default: break;
   }
 }

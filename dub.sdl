@@ -3,4 +3,32 @@ description "Not Another Make."
 authors "araspik"
 copyright "Copyright © 2018, araspik"
 license "MIT"
-dependency "sdlang-d" version="~>0.10.4"
+
+targetType "none"
+dependency "nam:exe" version="*"
+dependency "nam:lib" version="*"
+
+subPackage {
+  name "lib"
+  targetType "library"
+  targetName "nam"
+  targetPath "build"
+  sourcePaths "nam"
+  importPaths "."
+  dependency "sdlang-d" version="~>0.10.4"
+  preBuildCommands "mkdir -p build" platform="posix"
+  preBuildCommands "mkdir build" platform="windows"
+}
+
+subPackage {
+  name "exe"
+  targetType "executable"
+  targetName "nam"
+  targetPath "build"
+  workingDirectory "build"
+  sourcePaths "src"
+  importPaths "src"
+  dependency "nam:lib" version="*"
+  preBuildCommands "mkdir -p build" platform="posix"
+  preBuildCommands "mkdir build" platform="windows"
+}
