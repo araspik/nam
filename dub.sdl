@@ -25,7 +25,6 @@ subPackage {
   targetType "executable"
   targetName "nam"
   targetPath "build"
-  workingDirectory "build"
   sourcePaths "src"
   importPaths "src"
   dependency "nam:lib" version="*"

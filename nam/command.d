@@ -33,11 +33,11 @@ struct Command {
   /// A list of commands to execute. They are executed from a shell.
   string[] commands;
 
-  union {
+  private union {
     /// An unresolved string list of dependencies by command name.
     string[] dependStrs;
     /// A resolved list of dependencies.
-    const(Command)*[] dependencies;
+    const(Command)*[] depends;
   }
 
   /// Constructor: Uses an SDLang Tag to read from.
@@ -91,6 +91,8 @@ struct Command {
     dependencies = deps.data;
   }
 
+ @safe:
+
   /// Formats the data as a human-readable string.
   string toString() const {
     import std.format: format;
@@ -108,35 +110,58 @@ struct Command {
   /// Executes the stored commands regardless of need.
   /// Returns whether the dependencies were generated successfully.
   bool regenerate() const {
-    import std.stdio: writeln;
+    import std.stdio: writeln, writefln;
     import std.process: spawnShell, wait;
+    writefln!"Updating \"%s\""(name);
     foreach (d; dependencies) // Update dependencies
       if (!d.regenerate) return false;
     foreach (c; commands) { // Run commands
       writeln("> ", c);
       auto res = c.spawnShell.wait;
-      writeln("> [", res, "]");
-      if (!res) return false;
+      writeln(">= [", res, "]");
+      if (res) return false;
     }
     return true;
   }
 
   /// Executes the commands if an update is necessary.
   bool update() const {
-    return needsUpdate ? regenerate : true;
+    import std.stdio: writefln;
+    if (needsUpdate)
+      return regenerate;
+    writefln!"No need to update \"%s\""(name);
+    return true;
   }
 
- @property const nothrow:
+  /// Like update, but also takes a 'force' flag.
+  bool update(bool force) const {
+    return force ? regenerate : update;
+  }
+
+ @property nothrow:
+
+  /// The dependency list.
+  @trusted const(const(Command)*[]) dependencies() const {
+    return cast(typeof(return)) depends;
+  }
+
+  /// ditto
+  @trusted const(Command)*[] dependencies(const(Command)*[] newVal) {
+    return depends = newVal;
+  }
 
   import std.algorithm: map, minElement, maxElement;
   import std.file: timeLastModified;
   import std.exception: ifThrown, assumeWontThrow;
 
+ const:
+
   /// Returns whether the outputs or dependencies need to be updated.
   bool needsUpdate() {
-    import std.algorithm: fold;
-    return dependencies
-      .fold!((a, b) => a || b.needsUpdate)(outputUpdateTime > sourceUpdateTime);
+    bool res = sourceUpdateTime > outputUpdateTime;
+    foreach (d; dependencies)
+      res = res || d.needsUpdate;
+    return res;
   }
 
   /// Returns the earliest time that an output was modified.
@@ -150,7 +175,7 @@ struct Command {
   /// Returns the earliest time that a source was modified.
   SysTime sourceUpdateTime() {
     return sources
-      .map!(o => o.timeLastModified.ifThrown(SysTime(long.max)))
+      .map!(o => o.timeLastModified.ifThrown(SysTime(0)))
       .maxElement
       .assumeWontThrow;
   }

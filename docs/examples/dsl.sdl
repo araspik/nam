@@ -1,6 +1,7 @@
 project "Example" {
   languages "c" "c++"
   version 0 0 1
+  default "example"
 }
 
 cmd "example" {
